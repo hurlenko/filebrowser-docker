@@ -1,0 +1,80 @@
+name: Docker image build
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+  build_image:
+    name: Build docker image
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@master
+      - name: Fetch latest github release
+        run: |
+          sudo apt-get update && sudo apt-get install jq -y
+          THIS_REPO=https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest
+          TARGET_REPO=https://api.github.com/repos/mayswind/AriaNg/releases/latest
+          echo ::set-output name=current::"$(curl $THIS_REPO | jq -r '.tag_name')"
+          echo ::set-output name=target::"$(curl $TARGET_REPO | jq -r '.tag_name')"
+        id: releases
+
+      - name: Install Docker CE
+        if: steps.releases.outputs.current != steps.releases.outputs.target
+        run: |
+          sudo apt-get update
+          sudo apt-get install \
+              apt-transport-https \
+              ca-certificates \
+              curl \
+              gnupg-agent \
+              software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo apt-key fingerprint 0EBFCD88
+          sudo add-apt-repository \
+            "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) \
+            stable"
+          sudo apt-get update
+          sudo apt-get install docker-ce docker-ce-cli containerd.io
+          apt-cache madison docker-ce
+
+      - name: Setup Docker buildx
+        if: steps.releases.outputs.current != steps.releases.outputs.target
+        run: |
+          mkdir ~/.docker
+          echo $'{\n    "experimental": "enabled"\n}' | sudo tee ~/.docker/config.json;
+          sudo service docker restart
+          docker version
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker buildx create --use --name mult
+          docker buildx inspect --bootstrap
+          docker buildx ls
+
+      - name: Build and push image
+        if: steps.releases.outputs.current != steps.releases.outputs.target
+        env:
+          ARIANG_VERSION: ${{ steps.releases.outputs.target }}
+          DOCKERHUB_REPOSITORY: hurlenko/aria2-ariang
+          DOCKERHUB_USERNAME: hurlenko
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg ARIANG_VERSION=$ARIANG_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:$ARIANG_VERSION .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg ARIANG_VERSION=$ARIANG_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:latest .
+
+      - name: Update DockerHub Description
+        if: steps.releases.outputs.current != steps.releases.outputs.target
+        uses: peter-evans/dockerhub-description@v2.0.0
+        env:
+          DOCKERHUB_USERNAME: hurlenko
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_REPOSITORY: hurlenko/aria2-ariang
+
+      - name: Create new Github release
+        if: steps.releases.outputs.current != steps.releases.outputs.target
+        uses: meeDamian/github-release@1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.releases.outputs.target }}
+          name: Update to AriaNg ${{ steps.releases.outputs.target }}
