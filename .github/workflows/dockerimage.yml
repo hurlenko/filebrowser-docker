@@ -14,7 +14,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install jq -y
           THIS_REPO=https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest
-          TARGET_REPO=https://api.github.com/repos/mayswind/AriaNg/releases/latest
+          TARGET_REPO=https://api.github.com/repos/filebrowser/filebrowser/releases/latest
           echo ::set-output name=current::"$(curl $THIS_REPO | jq -r '.tag_name')"
           echo ::set-output name=target::"$(curl $TARGET_REPO | jq -r '.tag_name')"
         id: releases
@@ -54,14 +54,14 @@ jobs:
       - name: Build and push image
         if: steps.releases.outputs.current != steps.releases.outputs.target
         env:
-          ARIANG_VERSION: ${{ steps.releases.outputs.target }}
-          DOCKERHUB_REPOSITORY: hurlenko/aria2-ariang
+          TARGET_VERSION: ${{ steps.releases.outputs.target }}
+          DOCKERHUB_REPOSITORY: hurlenko/filebrowser
           DOCKERHUB_USERNAME: hurlenko
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg ARIANG_VERSION=$ARIANG_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:$ARIANG_VERSION .
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg ARIANG_VERSION=$ARIANG_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:latest .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg VERSION=$TARGET_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:$TARGET_VERSION .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg VERSION=$TARGET_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:latest .
 
       - name: Update DockerHub Description
         if: steps.releases.outputs.current != steps.releases.outputs.target
@@ -69,7 +69,7 @@ jobs:
         env:
           DOCKERHUB_USERNAME: hurlenko
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKERHUB_REPOSITORY: hurlenko/aria2-ariang
+          DOCKERHUB_REPOSITORY: hurlenko/filebrowser
 
       - name: Create new Github release
         if: steps.releases.outputs.current != steps.releases.outputs.target
@@ -77,4 +77,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.releases.outputs.target }}
-          name: Update to AriaNg ${{ steps.releases.outputs.target }}
+          name: Update to ${{ steps.releases.outputs.target }}

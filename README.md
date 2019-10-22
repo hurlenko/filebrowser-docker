@@ -1,22 +1,21 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mayswind/AriaNg-Native/master/assets/AriaNg.ico" />
+  <img src="https://raw.githubusercontent.com/filebrowser/logo/master/banner.png" width="550"/>
 </p>
 
-# [Aria2](https://github.com/aria2/aria2) + [AriaNg webui](https://github.com/mayswind/AriaNg) inside a [docker container](https://hub.docker.com/r/hurlenko/aria2-ariang)
+# [filebrowser](https://github.com/filebrowser/filebrowser) inside a [docker container](https://hub.docker.com/r/hurlenko/filebrowser)
 
-[![Latest Github release](https://img.shields.io/github/release/hurlenko/aria2-ariang-docker.svg)](https://github.com/hurlenko/aria2-ariang-docker/releases/latest)
-[![Image size](https://images.microbadger.com/badges/image/hurlenko/aria2-ariang.svg)](https://microbadger.com/images/hurlenko/aria2-ariang)
-[![Docker Pulls](https://img.shields.io/docker/pulls/hurlenko/aria2-ariang.svg)](https://hub.docker.com/r/hurlenko/aria2-ariang/)
-[![Docker Stars](https://img.shields.io/docker/stars/hurlenko/aria2-ariang.svg)](https://hub.docker.com/r/hurlenko/aria2-ariang/)
+[![Latest Github release](https://img.shields.io/github/release/hurlenko/filebrowser-docker.svg)](https://github.com/hurlenko/filebrowser-docker/releases/latest)
+[![Image size](https://images.microbadger.com/badges/image/hurlenko/filebrowser.svg)](https://microbadger.com/images/hurlenko/filebrowser)
+[![Docker Pulls](https://img.shields.io/docker/pulls/hurlenko/filebrowser.svg)](https://hub.docker.com/r/hurlenko/filebrowser/)
+[![Docker Stars](https://img.shields.io/docker/stars/hurlenko/filebrowser.svg)](https://hub.docker.com/r/hurlenko/filebrowser/)
 
 ## Introduction
 
-AriaNg is a modern web frontend making [aria2](https://github.com/aria2/aria2) easier to use. AriaNg is written in pure html & javascript, thus it does not need any compilers or runtime environment. You can just put AriaNg in your web server and open it in your browser. AriaNg uses responsive layout, and supports any desktop or mobile devices.
+filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files. It allows the creation of multiple users and each user can have its own directory. It can be used as a standalone app or as a middleware.
 
 ## 🚩 Table of Contents
 
 - [Screenshots](#-screenshots)
-- [Demo website](#-demo-website)
 - [Features](#-features)
 - [Usage](#-usage)
   - [Docker](#docker)
@@ -25,27 +24,24 @@ AriaNg is a modern web frontend making [aria2](https://github.com/aria2/aria2) e
   - [Ports desription](#ports-description)
   - [Supported environment variables](#supported-environment-variables)
   - [Supported volumes](#supported-volumes)
-  - [User / Group identifiers](#user-/-group-identifiers)
 - [Building](#-building)
 
 ## 🖼️ Screenshots
 
 ### Desktop
 
-![AriaNg](https://raw.githubusercontent.com/mayswind/AriaNg-WebSite/master/screenshots/desktop.png)
+![Preview](https://user-images.githubusercontent.com/5447088/50716739-ebd26700-107a-11e9-9817-14230c53efd2.gif)
 
 ### Mobile device
 
-![AriaNg](https://raw.githubusercontent.com/mayswind/AriaNg-WebSite/master/screenshots/mobile.png)
-
-## 🌐 Demo website
-
-Please visit [http://ariang.mayswind.net/latest](http://ariang.mayswind.net/latest)
+| | |
+|---|---|
+![Preview](https://user-images.githubusercontent.com/18035960/67269128-c7873000-f4be-11e9-89be-1fe33c3e973c.png) | ![Preview](https://user-images.githubusercontent.com/18035960/67269151-d4a41f00-f4be-11e9-9b10-ec08c3a96692.png)
 
 ## 🎨 Features
 
 - Confgurable via environment variables
-- Uses the PUID and PGID evironment variables to map the container's internal user to a user on the host machine
+- Can be run using different user
 - Supports multiple architectures, tested on Ubuntu 18.04 (`amd64`), Rock64 🍍 (`arm64`) and Raspberry Pi 🍓 (`arm32`)
 
 ## 📙 Usage
@@ -53,23 +49,20 @@ Please visit [http://ariang.mayswind.net/latest](http://ariang.mayswind.net/late
 ### Docker
 
 ```bash
-docker run -d --name ariang -p 8080:8080 hurlenko/aria2-ariang
+docker run -d --name filebrowser -p 80:8080 hurlenko/filebrowser
 ```
 
-To run as a different user and to map custom volume locations use:
+To run as current user and to map custom volume locations use:
 
 ```bash
 docker run -d \
-    --name aria2-ui \
+    --name filebrowser \
+    --user $(id -u):$(id -g) \
     -p 8080:8080 \
-    -v /DOWNLOAD_DIR:/aria2/data \
-    -v /CONFIG_DIR:/aria2/conf \
-    -e PUID=1000 \
-    -e PGID=1000 \
-    -e ARIA2RPCPORT=443 \
-    -e DOMAIN=https://ariang.com \
-    -e RPC_SECRET=NOBODYKNOWSME \
-    hurlenko/aria2-ariang
+    -v /DATA_DIR:/data \
+    -v /CONFIG_DIR:/config \
+    -e FB_BASEURL=/filebrowser \
+    hurlenko/filebrowser
 ```
 
 ### docker-compose
@@ -80,19 +73,16 @@ Minimal `docker-compose.yml` may look like this:
 version: "3"
 
 services:
-  ariang:
-    image: hurlenko/aria2-ariang
+  filebrowser:
+    image: hurlenko/filebrowser
+    user: "${UID}:${GID}"
     ports:
       - 443:8080
     volumes:
-      - /DOWNLOAD_DIR:/aria2/data
-      - /CONFIG_DIR:/aria2/conf
+      - /DATA_DIR:/data
+      - /CONFIG_DIR:/config
     environment:
-      - PUID=1000
-      - PGID=1000
-      - RPC_SECRET=secret
-      - DOMAIN=0.0.0.0:8080
-      - ARIA2RPCPORT=443
+      - FB_BASEURL=/filebrowser
     restart: always
 ```
 
@@ -107,12 +97,19 @@ docker-compose up
 You can use this nginx config:
 
 ```nginx
-location / {
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
+location /filebrowser {
+    # prevents 502 bad gateway error
+    proxy_buffers 8 32k;
+    proxy_buffer_size 64k;
+
+    client_max_body_size 75M;
+
+    # redirect all HTTP traffic to localhost:8088;
+    proxy_pass http://localhost:8080;
     proxy_set_header X-Real-IP $remote_addr;
-    # proxy_set_header X-Forwarded-Proto https;
-    proxy_pass http://127.0.0.1:5002;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #proxy_set_header X-NginX-Proxy true;
 
     # enables WS support
     proxy_http_version 1.1;
@@ -123,37 +120,23 @@ location / {
 }
 ```
 
+### Ports desription
+
+- `8080` - default filebrowser port
+
 ### Supported environment variables
 
-- `PUID` - Userid who will own all downloaded files and configuration files (Default `0` which is root)
-- `PGID` - Groupid who will own all downloaded files and configuration files (Default `0` which is root)
-- `RPC_SECRET` - The Aria2 RPC secret token (Default: not set)
-- `DOMAIN` - The domain you'd like to bind to (Default: `0.0.0.0:8080`)
-- `ARIA2RPCPORT` - The port that will be used for rpc calls to aria2. Usually you want to set it to the port your website is running on. For example if your AriaNg instance is accessible on `https://ariang.mysite.com` you need to set `ARIA2RPCPORT` to `443` (default https port), otherwise AriaNg won't be able to access aria2 rpc running on the default port `8080`. You can set the port in the web ui by going to `AriaNg Settings` > `Rpc` tab > `Aria2 RPC Address` field, and changing the default rpc port to whatever you need, but this has to be done per browser.
-
+The environment variables are prefixed by `FB_` followed by the option name in caps. So to set "database" via an env variable, you should set FB_DATABASE. The list of avalable options can be [found here](https://filebrowser.xyz/cli/filebrowser#options).
 
 ### Supported volumes
 
-- `/aria2/data` The folder of all Aria2 downloaded files
-- `/aria2/conf` The Aria2 configuration file
-
-### User / Group identifiers
-
-When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.
-
-Ensure any volume directories on the host are owned by the same user you specify and any permissions issues will vanish like magic.
-
-In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as below:
-
-```bash
-id username
-    uid=1001(dockeruser) gid=1001(dockergroup) groups=1001(dockergroup)
-```
+- `/data` - Data directory to browse
+- `/config` - `filebrowser.db` location
 
 ## 🔨 Building
 
 ```bash
-git clone https://github.com/hurlenko/aria2-ariang-docker
-cd aria2-ariang-docker
-docker build -t hurlenko/aria2-ariang .
+git clone https://github.com/hurlenko/filebrowser-docker
+cd filebrowser-docker
+docker build -t hurlenko/filebrowser .
 ```

@@ -4,23 +4,18 @@ ARG VERSION
 
 COPY get.sh get.sh
 
-RUN apk add --virtual=build-dependencies \
-    bash \
-    && ./get.sh $VERSION \
-    && apk del --purge build-dependencies
+RUN apk add bash \
+    && ./get.sh $VERSION
 
-FROM alpine as runtime
+FROM alpine:3
 
 ARG BUILD_DATE
 ARG VCS_REF
 
-ENV DOMAIN=0.0.0.0:8080
-ENV ARIA2RPCPORT=8080
-
 LABEL maintainer="hurlenko" \
     org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="filebrowser" \
-    org.label-schema.description="Web File Browser which can be used as a middleware or standalone app. " \
+    org.label-schema.description="Web File Browser which can be used as a middleware or standalone app" \
     org.label-schema.version=$VERSION \
     org.label-schema.url="https://github.com/hurlenko/filebrowser-docker" \
     org.label-schema.license="MIT" \
@@ -30,9 +25,13 @@ LABEL maintainer="hurlenko" \
     org.label-schema.vendor="hurlenko" \
     org.label-schema.schema-version="1.0"
 
-COPY --from=builder /usr/local/bin/filebrowser /filebrowser/filebrowser
 
-VOLUME /srv
-EXPOSE 80
+COPY --from=builder /usr/local/bin/filebrowser /filebrowser
 
-ENTRYPOINT ["/filebrowser/filebrowser"]
+RUN mkdir -p -m 777 /config \
+    && mkdir -p -m 777 /data
+
+EXPOSE 8080
+
+ENTRYPOINT ["/filebrowser"]
+CMD ["--root=/data", "--address=0.0.0.0", "--database=/config/filebrowser.db"]
