@@ -63,13 +63,13 @@ jobs:
           docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg VERSION=$TARGET_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:$TARGET_VERSION .
           docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7 --build-arg VERSION=$TARGET_VERSION --build-arg VCS_REF=${GITHUB_SHA::7} --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -t $DOCKERHUB_REPOSITORY:latest .
 
-      - name: Update DockerHub Description
-        if: steps.releases.outputs.current != steps.releases.outputs.target
-        uses: peter-evans/dockerhub-description@v2.0.0
-        env:
-          DOCKERHUB_USERNAME: hurlenko
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKERHUB_REPOSITORY: hurlenko/filebrowser
+      # - name: Update DockerHub Description
+      #   if: steps.releases.outputs.current != steps.releases.outputs.target
+      #   uses: peter-evans/dockerhub-description@v2.0.0
+      #   env:
+      #     DOCKERHUB_USERNAME: hurlenko
+      #     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+      #     DOCKERHUB_REPOSITORY: hurlenko/filebrowser
 
       - name: Create new Github release
         if: steps.releases.outputs.current != steps.releases.outputs.target
