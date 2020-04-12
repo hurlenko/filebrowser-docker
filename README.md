@@ -5,7 +5,7 @@
 # [filebrowser](https://github.com/filebrowser/filebrowser) inside a [docker container](https://hub.docker.com/r/hurlenko/filebrowser)
 
 [![Latest Github release](https://img.shields.io/github/release/hurlenko/filebrowser-docker.svg)](https://github.com/hurlenko/filebrowser-docker/releases/latest)
-[![Image size](https://images.microbadger.com/badges/image/hurlenko/filebrowser.svg)](https://microbadger.com/images/hurlenko/filebrowser)
+[![Image size](https://img.shields.io/docker/image-size/hurlenko/aria2-ariang/latest)](https://hub.docker.com/r/hurlenko/filebrowser)
 [![Docker Pulls](https://img.shields.io/docker/pulls/hurlenko/filebrowser.svg)](https://hub.docker.com/r/hurlenko/filebrowser/)
 [![Docker Stars](https://img.shields.io/docker/stars/hurlenko/filebrowser.svg)](https://hub.docker.com/r/hurlenko/filebrowser/)
 
@@ -13,20 +13,20 @@
 
 filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files. It allows the creation of multiple users and each user can have its own directory. It can be used as a standalone app or as a middleware.
 
-## 🚩 Table of Contents
+## Table of Contents
 
-- [Screenshots](#-screenshots)
-- [Features](#-features)
-- [Usage](#-usage)
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Usage](#usage)
   - [Docker](#docker)
   - [docker-compose](#docker-compose)
   - [Nginx](#running-behind-nginx-proxy)
   - [Ports desription](#ports-description)
   - [Supported environment variables](#supported-environment-variables)
   - [Supported volumes](#supported-volumes)
-- [Building](#-building)
+- [Building](#building)
 
-## 🖼️ Screenshots
+## Screenshots
 
 ### Desktop
 
@@ -38,13 +38,13 @@ filebrowser provides a file managing interface within a specified directory and 
 |---|---|
 ![Preview](https://user-images.githubusercontent.com/18035960/67269128-c7873000-f4be-11e9-89be-1fe33c3e973c.png) | ![Preview](https://user-images.githubusercontent.com/18035960/67269151-d4a41f00-f4be-11e9-9b10-ec08c3a96692.png)
 
-## 🎨 Features
+## Features
 
 - Confgurable via environment variables
 - Can be run using different user
 - Supports multiple architectures, tested on Ubuntu 18.04 (`amd64`), Rock64 🍍 (`arm64`) and Raspberry Pi 🍓 (`arm32`)
 
-## 📙 Usage
+## Usage
 
 ### Docker
 
@@ -120,7 +120,7 @@ location /filebrowser {
 }
 ```
 
-### Ports desription
+### Ports description
 
 - `8080` - default filebrowser port
 
@@ -133,7 +133,7 @@ The environment variables are prefixed by `FB_` followed by the option name in c
 - `/data` - Data directory to browse
 - `/config` - `filebrowser.db` location
 
-## 🔨 Building
+## Building
 
 ```bash
 git clone https://github.com/hurlenko/filebrowser-docker
