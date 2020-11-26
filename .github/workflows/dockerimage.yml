@@ -42,7 +42,7 @@ jobs:
       - name: Setup Docker buildx
         if: steps.releases.outputs.current != steps.releases.outputs.target
         run: |
-          mkdir ~/.docker
+          mkdir -p ~/.docker
           echo $'{\n    "experimental": "enabled"\n}' | sudo tee ~/.docker/config.json;
           sudo service docker restart
           docker version
