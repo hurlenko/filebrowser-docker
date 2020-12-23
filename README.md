@@ -24,6 +24,7 @@ filebrowser provides a file managing interface within a specified directory and 
   - [Ports desription](#ports-description)
   - [Supported environment variables](#supported-environment-variables)
   - [Supported volumes](#supported-volumes)
+  - [Attaching multiple directories](#attaching-multiple-directories)
 - [Building](#building)
 
 ## Screenshots
@@ -132,6 +133,18 @@ The environment variables are prefixed by `FB_` followed by the option name in c
 
 - `/data` - Data directory to browse
 - `/config` - `filebrowser.db` location
+
+### Attaching multiple directories
+
+If you want to attach multiple directories you need to mount them as subdirectories of the data directory inside of the container (`/data` by default):
+
+```bash
+docker run \
+    -v /path/to/music:/data/music \
+    -v /path/to/movies:/data/movies \
+    -v /path/to/photos:/data/photos \
+    hurlenko/filebrowser
+```
 
 ## Building
 
