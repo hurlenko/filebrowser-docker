@@ -127,7 +127,7 @@ location /filebrowser {
 
 ### Supported environment variables
 
-The environment variables are prefixed by `FB_` followed by the option name in caps. So to set "database" via an env variable, you should set FB_DATABASE. The list of avalable options can be [found here](https://filebrowser.xyz/cli/filebrowser#options).
+The environment variables are prefixed by `FB_` followed by the option name in caps. So to set "database" via an env variable, you should set FB_DATABASE. The list of avalable options can be [found here](https://filebrowser.org/cli/filebrowser#options).
 
 ### Supported volumes
 
