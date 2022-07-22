@@ -65,11 +65,11 @@ jobs:
 
       - name: Update DockerHub Description
         if: steps.releases.outputs.current != steps.releases.outputs.target
-        uses: peter-evans/dockerhub-description@v2.0.0
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          DOCKERHUB_REPOSITORY: ${{ secrets. DOCKERHUB_REPOSITORY }}
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          repository: ${{ secrets. DOCKERHUB_REPOSITORY }}
 
       - name: Create new Github release
         if: steps.releases.outputs.current != steps.releases.outputs.target
