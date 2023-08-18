@@ -21,7 +21,7 @@ filebrowser provides a file managing interface within a specified directory and 
   - [Docker](#docker)
   - [docker-compose](#docker-compose)
   - [Nginx](#running-behind-nginx-proxy)
-  - [Ports desription](#ports-description)
+  - [Ports description](#ports-description)
   - [Supported environment variables](#supported-environment-variables)
   - [Supported volumes](#supported-volumes)
   - [Attaching multiple directories](#attaching-multiple-directories)
